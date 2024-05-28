@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "456400754992",
+    "project_id": "abdi2004-notesapp",
+    "storage_bucket": "abdi2004-notesapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:456400754992:android:6bd4eff6f707c99a6690f5",
+        "android_client_info": {
+          "package_name": "com.first.notetaker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHBBHkywVcXxojmK28wyem2vQNwRlfm3U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
