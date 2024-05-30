@@ -1,7 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:notetaker/firebase_options.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -34,57 +32,59 @@ class _RegisterViewState extends State<RegisterView> {
       appBar: AppBar(
         title: const Text("Register"),
       ),
-      body: FutureBuilder(
-        future: Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        ),
-        builder: (context, snapshot) {
-          return Column(
-            children: [
-              TextField(
-                controller: _email,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: "Enter Your Email Address",
-                ),
-              ),
-              TextField(
-                controller: _password,
-                obscureText: true,
-                enableSuggestions: false,
-                autocorrect: false,
-                decoration: const InputDecoration(
-                  hintText: "Enter Your Password",
-                ),
-              ),
-              TextButton(
-                onPressed: () async {
-                  final email = _email.text;
-                  final password = _password.text;
-                  try {
-                    final userCredential =
-                        FirebaseAuth.instance.createUserWithEmailAndPassword(
-                      email: email,
-                      password: password,
-                    );
-                    print(userCredential);
-                  } on FirebaseAuthException catch (e) {
-                    if (e.code == "email-already-in-use") {
-                      print("Email already in use");
-                    } else if (e.code == "weak-password") {
-                      print("Weak Password");
-                    } else if (e.code == "invalid-email") {
-                      print("Invalid Email");
-                    } else {
-                      print("Unknown Error");
-                    }
-                  }
-                },
-                child: const Text("Register"),
-              ),
-            ],
-          );
-        },
+      body: Column(
+        children: [
+          TextField(
+            controller: _email,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(
+              hintText: "Enter Your Email Address",
+            ),
+          ),
+          TextField(
+            controller: _password,
+            obscureText: true,
+            enableSuggestions: false,
+            autocorrect: false,
+            decoration: const InputDecoration(
+              hintText: "Enter Your Password",
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              final email = _email.text;
+              final password = _password.text;
+              try {
+                final userCredential =
+                    FirebaseAuth.instance.createUserWithEmailAndPassword(
+                  email: email,
+                  password: password,
+                );
+                print(userCredential);
+              } on FirebaseAuthException catch (e) {
+                if (e.code == "email-already-in-use") {
+                  print("Email already in use");
+                } else if (e.code == "weak-password") {
+                  print("Weak Password");
+                } else if (e.code == "invalid-email") {
+                  print("Invalid Email");
+                } else {
+                  print("Unknown Error");
+                }
+              }
+            },
+            child: const Text("Register"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/login/',
+                (route) => false,
+              );
+            },
+            child: const Text("Already Have a Account? Login Here!"),
+          ),
+        ],
       ),
     );
   }
