@@ -71,6 +71,10 @@ class _LoginViewState extends State<LoginView> {
                   print("Error Unknown");
                 }
               }
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/notespage/',
+                (_) => false,
+              );
             },
             child: const Text("Login"),
           ),
