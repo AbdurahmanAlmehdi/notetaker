@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:notetaker/constants/routes.dart';
+import 'package:notetaker/utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -56,26 +57,37 @@ class _LoginViewState extends State<LoginView> {
               final email = _email.text;
               final password = _password.text;
               try {
-                final userCredential =
-                    await FirebaseAuth.instance.signInWithEmailAndPassword(
+                await FirebaseAuth.instance.signInWithEmailAndPassword(
                   email: email,
                   password: password,
                 );
-                print(userCredential);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  notesRoute,
+                  (_) => false,
+                );
               } on FirebaseAuthException catch (e) {
-                print(e.code);
                 if (e.code == "user-not-found") {
-                  print("User Not found");
+                  await showErrorDialog(
+                    context,
+                    'User Not Found',
+                  );
                 } else if (e.code == "wrong-password") {
-                  print("Wrong Password");
+                  await showErrorDialog(
+                    context,
+                    'Wrong Password',
+                  );
                 } else {
-                  print("Error Unknown");
+                  await showErrorDialog(
+                    context,
+                    'UnExpected Error ${e.code}',
+                  );
                 }
+              } catch (e) {
+                await showErrorDialog(
+                  context,
+                  e.toString(),
+                );
               }
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                notesRoute,
-                (_) => false,
-              );
             },
             child: const Text("Login"),
           ),
