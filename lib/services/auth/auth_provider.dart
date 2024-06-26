@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:notetaker/services/auth/auth_user.dart';
 
 abstract class AuthProvider {
+  Future<void> initialize();
   AuthUser? get currentuser;
   Future<AuthUser> login({
     required String email,
