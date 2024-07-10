@@ -43,11 +43,11 @@ class _NewNoteViewState extends State<NewNoteView> {
     if (existingNote != null) {
       return existingNote;
     }
-    final currentuser = AuthService.firebase().currentuser!;
-    final email = currentuser.email!;
-    final owner = await _notesService.getOrCreateUser(email: email);
+    final currentUser = AuthService.firebase().currentuser!;
+    final email = currentUser.email!;
+    final owner = await _notesService.getUser(email: email);
 
-    return _notesService.createNote(owner: owner);
+    return await _notesService.createNote(owner: owner);
   }
 
   void _deleteNoteIfNoteIsEmpty() {
@@ -60,12 +60,20 @@ class _NewNoteViewState extends State<NewNoteView> {
   void _saveNoteIfNoteIsNotEmpty() async {
     final note = _note;
     final text = _textController.text;
-    if (_textController.text.isNotEmpty && note != null) {
+    if (note != null && text.isNotEmpty) {
       await _notesService.updateNote(
         note: note,
         text: text,
       );
     }
+  }
+
+  @override
+  void dispose() {
+    _deleteNoteIfNoteIsEmpty();
+    _saveNoteIfNoteIsNotEmpty();
+    _textController.dispose();
+    super.dispose();
   }
 
   @override
@@ -79,7 +87,7 @@ class _NewNoteViewState extends State<NewNoteView> {
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.done:
-                _note = snapshot.data as DatabaseNote;
+                _note = snapshot.data;
                 _setupTextControllerListener();
                 return TextField(
                   controller: _textController,
@@ -94,13 +102,5 @@ class _NewNoteViewState extends State<NewNoteView> {
             }
           },
         ));
-  }
-
-  @override
-  void dispose() {
-    _deleteNoteIfNoteIsEmpty();
-    _saveNoteIfNoteIsNotEmpty();
-    _textController.dispose();
-    super.dispose();
   }
 }
