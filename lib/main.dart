@@ -1,6 +1,6 @@
 import 'package:notetaker/constants/routes.dart';
 import 'package:notetaker/services/auth/auth_service.dart';
-import 'package:notetaker/views/notes/new_notes_view.dart';
+import 'package:notetaker/views/notes/create_update_notes_view.dart';
 import 'package:notetaker/views/notes/notes_view.dart';
 import 'package:notetaker/views/verifyemail_view.dart';
 import 'views/register_view.dart';
@@ -23,7 +23,7 @@ void main() {
         registerRoute: (context) => const RegisterView(),
         notesRoute: (context) => const NotesView(),
         verifyEmailRoute: (context) => const VerifyEmailPage(),
-        newNoteRoute: (context) => const NewNoteView(),
+        createOrUpdateNoteRoute: (context) => const CreateUpdateNoteView(),
       },
     ),
   );
