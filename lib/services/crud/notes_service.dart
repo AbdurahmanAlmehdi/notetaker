@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:notetaker/extensions/list/filter.dart';
 import 'package:notetaker/services/crud/crud_exceptions.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -9,6 +10,8 @@ import 'package:path/path.dart' show join;
 class NotesService {
   Database? _db;
   List<DatabaseNote> _notes = [];
+
+  DatabaseUser? _user;
 
   static final NotesService _shared = NotesService._sharedInstance();
   NotesService._sharedInstance() {
@@ -22,7 +25,17 @@ class NotesService {
 
   late final StreamController<List<DatabaseNote>> _notesStreamController;
 
-  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
+  Stream<List<DatabaseNote>> get allNotes =>
+      _notesStreamController.stream.filter(
+        (note) {
+          final currentUser = _user;
+          if (currentUser != null) {
+            return currentUser.id == note.userId;
+          } else {
+            throw userShouldBeSetBeforeReadingAllNotes();
+          }
+        },
+      );
 
   Future<void> _cacheNotes() async {
     final allNotes = await getAllNotes();
@@ -30,12 +43,21 @@ class NotesService {
     _notesStreamController.add(_notes);
   }
 
-  Future<DatabaseUser> getOrCreateUser({required String email}) async {
+  Future<DatabaseUser> getOrCreateUser({
+    required String email,
+    bool setAsCurruntUser = true,
+  }) async {
     try {
       final user = await getUser(email: email);
+      if (setAsCurruntUser) {
+        _user = user;
+      }
       return user;
     } on UserNotFound {
       final createdUser = await createUser(email: email);
+      if (setAsCurruntUser) {
+        _user = createdUser;
+      }
       return createdUser;
     } catch (e) {
       rethrow;
