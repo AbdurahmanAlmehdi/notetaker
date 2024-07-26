@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:notetaker/constants/routes.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notetaker/services/auth/auth_exceptions.dart';
-import 'package:notetaker/services/auth/auth_service.dart';
+import 'package:notetaker/services/auth/bloc/auth_bloc.dart';
+import 'package:notetaker/services/auth/bloc/auth_event.dart';
+import 'package:notetaker/services/auth/bloc/auth_state.dart';
 
 import 'package:notetaker/utilities/dialogs/show_error_dialog.dart';
 
@@ -32,70 +34,60 @@ class _RegisterViewState extends State<RegisterView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Register"),
-      ),
-      body: Column(
-        children: [
-          TextField(
-            controller: _email,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              hintText: "Enter Your Email Address",
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) async {
+        if (state is AuthStateRegistering) {
+          if (state.exception is EmailAlreadyInUseAuthException) {
+            await showErrorDialog(context, "Email already in use");
+          } else if (state.exception is WeakPasswordAuthException) {
+            await showErrorDialog(context, "Weak Password");
+          } else if (state.exception is InvalidEmailAuthException) {
+            await showErrorDialog(context, 'Invalid Email');
+          } else if (state.exception is GenericAuthException) {
+            await showErrorDialog(context, 'Failed to Create Account');
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Register"),
+        ),
+        body: Column(
+          children: [
+            TextField(
+              controller: _email,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                hintText: "Enter Your Email Address",
+              ),
             ),
-          ),
-          TextField(
-            controller: _password,
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-            decoration: const InputDecoration(
-              hintText: "Enter Your Password",
+            TextField(
+              controller: _password,
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
+              decoration: const InputDecoration(
+                hintText: "Enter Your Password",
+              ),
             ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final email = _email.text;
-              final password = _password.text;
-              try {
-                await AuthService.firebase()
-                    .createuser(email: email, password: password);
-                await AuthService.firebase().sendEmailVerification();
-              } on EmailAlreadyInUseAuthException {
-                await showErrorDialog(
-                  context,
-                  "Email already in use",
-                );
-              } on WeakPasswordAuthException {
-                await showErrorDialog(
-                  context,
-                  "Weak Password",
-                );
-              } on InvalidEmailAuthException {
-                await showErrorDialog(
-                  context,
-                  'Invalid Email',
-                );
-              } on GenericAuthException {
-                await showErrorDialog(
-                  context,
-                  'Failed to Create Account',
-                );
-              }
-            },
-            child: const Text("Register"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                loginRoute,
-                (route) => false,
-              );
-            },
-            child: const Text("Already Have a Account? Login Here!"),
-          ),
-        ],
+            TextButton(
+              onPressed: () async {
+                final email = _email.text;
+                final password = _password.text;
+                context
+                    .read<AuthBloc>()
+                    .add(AuthEventRegister(email, password));
+              },
+              child: const Text("Register"),
+            ),
+            TextButton(
+              onPressed: () {
+                context.read<AuthBloc>().add(const AuthEventLogOut());
+              },
+              child: const Text("Already Have a Account? Login Here!"),
+            ),
+          ],
+        ),
       ),
     );
   }

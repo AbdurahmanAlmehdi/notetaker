@@ -8,7 +8,7 @@ class FirebaseCloudStorage {
 
   Future<void> deleteNote({required String documentId}) async {
     try {
-      await notes.doc(documentId).delete;
+      await notes.doc(documentId).delete();
     } catch (e) {
       throw CouldNotDeleteNotesException();
     }
@@ -28,7 +28,7 @@ class FirebaseCloudStorage {
   Stream<Iterable<CloudNote>> allNotes(String ownerUserId) =>
       notes.snapshots().map((events) => events.docs
           .map((doc) => CloudNote.fromSnapshot(doc))
-          .where((note) => note.documentId == ownerUserId));
+          .where((note) => note.ownerUserId == ownerUserId));
 
   Future<Iterable<CloudNote>> getNotes({required ownerUserId}) async {
     try {
@@ -54,11 +54,17 @@ class FirebaseCloudStorage {
     }
   }
 
-  Future<void> createNewNote({required String ownerUserId}) async {
-    await notes.add({
+  Future<CloudNote> createNewNote({required String ownerUserId}) async {
+    final document = await notes.add({
       ownerUserIdFieldName: ownerUserId,
       textFieldName: '',
     });
+    final fetchedNote = await document.get();
+    return CloudNote(
+      documentId: fetchedNote.id,
+      ownerUserId: ownerUserId,
+      text: '',
+    );
   }
 
   static final FirebaseCloudStorage _shared =
